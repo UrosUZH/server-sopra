@@ -4,6 +4,7 @@ import ch.uzh.ifi.seal.soprafs19.constant.UserStatus;
 
 import java.io.Serializable;
 
+import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -18,18 +19,24 @@ public class User implements Serializable {
 	@Id
 	@GeneratedValue
 	private Long id;
+
+	@Column(nullable = false, unique = true)
+	private String username;
 	
 	@Column(nullable = false) 
 	private String name;
-	
-	@Column(nullable = false, unique = true) 
-	private String username;
-	
+
 	@Column(nullable = false, unique = true) 
 	private String token;
 
 	@Column(nullable = false)
 	private UserStatus status;
+
+	@Column(nullable = false)
+	private String creationDate;
+
+	@Column(nullable = false)
+	private int err;
 
 	public Long getId() {
 		return id;
@@ -70,6 +77,24 @@ public class User implements Serializable {
 	public void setStatus(UserStatus status) {
 		this.status = status;
 	}
+
+	public String getDate() {
+		return creationDate;
+	}
+
+	public void setDate() {
+		this.creationDate = new Date().toString();
+	}
+
+	public int getError() {
+		return err;
+	}
+
+	public void setError(int err) {
+		this.err = err;
+	}
+
+
 
 	@Override
 	public boolean equals(Object o) {

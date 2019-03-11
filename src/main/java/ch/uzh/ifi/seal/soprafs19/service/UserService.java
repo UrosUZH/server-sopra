@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -29,11 +30,36 @@ public class UserService {
         return this.userRepository.findAll();
     }
 
+    public Optional<User> getUser(Long id){
+        return this.userRepository.findById(id);
+    }
+
+    public User checkUser(User newUser){
+        User test = userRepository.findByUsername(newUser.getUsername());
+        if (test.getName().equals(newUser.getName())){
+            test.setError(5);
+            test.setError(0);
+        }
+        else{
+            test.setError(3);
+            test.setError(2);
+        }
+        return test;
+
+    }
+
     public User createUser(User newUser) {
         newUser.setToken(UUID.randomUUID().toString());
         newUser.setStatus(UserStatus.ONLINE);
-        userRepository.save(newUser);
-        log.debug("Created Information for User: {}", newUser);
+        newUser.setDate();
+        if (userRepository.findByUsername(newUser.getUsername())==null) {
+            newUser.setError(0);
+            userRepository.save(newUser);
+            log.debug("Created Information for User: {}", newUser);
+        }
+        else {
+            newUser.setError(1);
+        }
         return newUser;
     }
 }
