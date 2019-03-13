@@ -33,6 +33,17 @@ public class UserService {
     public Optional<User> getUser(Long id){
         return this.userRepository.findById(id);
     }
+    public boolean existID(Long id){
+        return this.userRepository.existsById(id);
+    }
+    public boolean existUsername(User newUser){
+        if (userRepository.findByUsername(newUser.getUsername())==null){
+            return false;
+        }
+        else {
+            return true;
+        }
+    }
 
     public User checkUser(User newUser){
         User test = userRepository.findByUsername(newUser.getUsername());
@@ -61,5 +72,26 @@ public class UserService {
             newUser.setError(1);
         }
         return newUser;
+    }
+    public void createUser2(User newUser) {
+        newUser.setToken(UUID.randomUUID().toString());
+        newUser.setStatus(UserStatus.ONLINE);
+        newUser.setDate();
+        newUser.setError(3);
+        userRepository.save(newUser);
+        log.debug("Created Information for User: {}", newUser);
+    }
+    public void updateUser(User oldUser){
+         this.userRepository.findById(oldUser.getId()).get().setUsername(oldUser.getUsername());
+         this.userRepository.findById(oldUser.getId()).get().setUsername(oldUser.getUsername());
+         this.userRepository.save(this.userRepository.findById(oldUser.getId()).get());
+    }
+    public boolean updateCheck(User updateUser){
+        if (this.userRepository.findByUsername(updateUser.getUsername())==null){
+            return true;
+        }
+        else{
+            return false;
+        }
     }
 }
