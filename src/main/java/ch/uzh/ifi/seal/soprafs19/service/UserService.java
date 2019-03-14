@@ -57,7 +57,7 @@ public class UserService {
         return test;
 
     }
-
+    //used error attribute before i knew how to do ResponseEntity
     public User createUser(User newUser) {
         newUser.setToken(UUID.randomUUID().toString());
         newUser.setStatus(UserStatus.ONLINE);

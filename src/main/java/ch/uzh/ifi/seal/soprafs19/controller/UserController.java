@@ -1,16 +1,11 @@
 package ch.uzh.ifi.seal.soprafs19.controller;
-
 import ch.uzh.ifi.seal.soprafs19.constant.UserStatus;
 import ch.uzh.ifi.seal.soprafs19.entity.User;
 import ch.uzh.ifi.seal.soprafs19.service.UserService;
-import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.config.annotation.CorsRegistry;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-import java.util.Optional;
 
 
 @RestController
@@ -25,8 +20,10 @@ public class UserController  {
     @GetMapping("/users") // get all users
     Iterable<User> all() {
         Iterable<User> everyBody = service.getUsers();
-        for (User user : everyBody)
+        for (User user : everyBody) {
             user.setPassword("Very secret password");
+            user.setToken("Very secret password");
+        }
         return everyBody;
     }
 
@@ -51,7 +48,7 @@ public class UserController  {
         }
         else{
             this.service.createUser2(newUser);
-            return ResponseEntity.status(HttpStatus.CREATED).body("Location: /login");
+            return ResponseEntity.status(HttpStatus.CREATED).body("/login");
         }
 
     }
@@ -73,7 +70,7 @@ public class UserController  {
     ResponseEntity updateUser(@RequestBody User oldUser, @PathVariable Long id){
         if (this.service.existID(id) & this.service.updateCheck(oldUser)){
             this.service.updateUser(oldUser);
-            return ResponseEntity.status(HttpStatus.NO_CONTENT).body("Good: User id found and updated");
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).body("-");
         }
         else{
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User with that id is not found" +

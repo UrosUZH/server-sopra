@@ -43,42 +43,58 @@ public class UserControllerTest {
     @Autowired
     private UserRepository userRepository;
 
-    @Test
-    public void fetchAllUsersWithInvalidToken() throws Exception {
-        this.mvc.perform(get("/users").header("authorization", "fake_token")).andDo(print()).andExpect(status().is(403));
-    }
-
-    @Test
-    public void fetchUserWithInvalidToken() throws Exception {
-        this.mvc.perform(get("/users/1").header("authorization", "fake_token")).andDo(print()).andExpect(status().is(403));
-    }
+/// I had some issues here that i couldn't resolve, somehow the tests were dependent on each other
+    // i.e. when i edited one test other tests would succeed somehow or fail, while not being altered
+    // i cant seem to find the reason why, i would have made more tests but those manipulated the previous
+    // test results. ( would have tested the opposite)
 
     @Test
     public void createUser() throws Exception {
 
-        this.mvc.perform(post("/users")
+        this.mvc.perform(post("/user") // register/creating new user
                 .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"name\": \"Test User\",\"username\": \"testUser\", \"password\": \"testPassword\"}"))
-                .andExpect(status().is(201)) //andDo(print()).
-                .andExpect(jsonPath("$.path", notNullValue()));
+                .content("{\"username\": \"testUserr\", \"password\": \"testPasswordd\"}"))
+                .andExpect(status().is(201)).andDo(print());
+
 
         userRepository.delete(userRepository.findByUsername("testUser"));
 
     }
 
     @Test
-    public void loginUser() throws Exception {
+    public void getProfile() throws Exception {
         User testUser = new User();
         testUser.setUsername("testUser");
-        testUser.setName("Test User");
         testUser.setPassword("testPassword");
-        String path = userService.createUser(testUser);
+        userService.createUser2(testUser);
+
+        this.mvc.perform(get("/user/{id}","2"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(1))
+                .andExpect(jsonPath("$.username").value("testUser"))
+                .andExpect(jsonPath("$.password").value("very secret password"))
+                .andExpect(jsonPath("$.token", notNullValue()))
+                .andExpect(jsonPath("$.status").value("ONLINE"))
+                .andExpect(jsonPath("$.birthday").value("New"));}
+
+
+        @Test
+        public void loginUser() throws Exception {
+        User testUser = new User();
+        testUser.setUsername("testUser");
+        testUser.setPassword("testPassword");
+        userService.createUser2(testUser);
+
 
         this.mvc.perform(post("/login")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"username\": \"testUser\", \"password\": \"testPassword\"}"))
-                .andExpect(status().is(200))
-                .andExpect(jsonPath("$.token", notNullValue()));
+                .andExpect(jsonPath("$.id").value(1))
+                .andExpect(jsonPath("$.username").value("testUser"))
+                .andExpect(jsonPath("$.password").value("SecretPassword"))
+                .andExpect(jsonPath("$.token", notNullValue()))
+                .andExpect(jsonPath("$.status").value("ONLINE"))
+                .andExpect(jsonPath("$.birthday").value("New"));
 
         userRepository.delete(userRepository.findByUsername("testUser"));
 
@@ -87,16 +103,15 @@ public class UserControllerTest {
     @Test
     public void updateUser() throws Exception {
         User testUser = new User();
-        testUser.setUsername("testUser");
-        testUser.setName("Test User");
-        testUser.setPassword("testPassword");
-        String path = userService.createUser(testUser);
 
-        this.mvc.perform(put("/users/1")
+        testUser.setUsername("testUser");
+        testUser.setPassword("testPassword");
+        userService.createUser2(testUser);
+
+        this.mvc.perform(put("/user/1")
                 .contentType(MediaType.APPLICATION_JSON)
-                .header("authorization", testUser.getToken())
-                .content("{\"name\": \"Test User Updated\",\"username\": \"testUserUpdated\", \"password\": \"testPasswordUpdated\"}"))
-                .andExpect(status().is(200)); //andDo(print()).
+                .content("{\"username\": \"testUserUpdated\",\"id\": \"1\", \"birthday\": \"testBirthdayUpdated\"}"))
+                .andExpect(status().is(204));
         userRepository.delete(userRepository.findByUsername("testUserUpdated"));
 
     }
