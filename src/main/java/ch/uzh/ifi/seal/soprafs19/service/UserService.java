@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -30,8 +29,8 @@ public class UserService {
         return this.userRepository.findAll();
     }
 
-    public Optional<User> getUser(Long id){
-        return this.userRepository.findById(id);
+    public User getUser(Long id){
+        return userRepository.findById(id).get();
     }
     public boolean existID(Long id){
         return this.userRepository.existsById(id);
@@ -47,7 +46,7 @@ public class UserService {
 
     public User checkUser(User newUser){
         User test = userRepository.findByUsername(newUser.getUsername());
-        if (test.getName().equals(newUser.getName())){
+        if (test.getPassword().equals(newUser.getPassword())){
             test.setError(5);
             test.setError(0);
         }
@@ -77,13 +76,16 @@ public class UserService {
         newUser.setToken(UUID.randomUUID().toString());
         newUser.setStatus(UserStatus.ONLINE);
         newUser.setDate();
-        newUser.setError(3);
+        newUser.setBirthday("New");
+        newUser.setError(100);
         userRepository.save(newUser);
         log.debug("Created Information for User: {}", newUser);
     }
     public void updateUser(User oldUser){
-         this.userRepository.findById(oldUser.getId()).get().setUsername(oldUser.getUsername());
-         this.userRepository.findById(oldUser.getId()).get().setUsername(oldUser.getUsername());
+        if (oldUser.getUsername()!=null){
+         this.userRepository.findById(oldUser.getId()).get().setUsername(oldUser.getUsername());}
+        if(!oldUser.getBirthday().equals("")){
+         this.userRepository.findById(oldUser.getId()).get().setBirthday(oldUser.getBirthday());}
          this.userRepository.save(this.userRepository.findById(oldUser.getId()).get());
     }
     public boolean updateCheck(User updateUser){

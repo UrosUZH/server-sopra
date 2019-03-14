@@ -1,5 +1,6 @@
 package ch.uzh.ifi.seal.soprafs19.controller;
 
+import ch.uzh.ifi.seal.soprafs19.constant.UserStatus;
 import ch.uzh.ifi.seal.soprafs19.entity.User;
 import ch.uzh.ifi.seal.soprafs19.service.UserService;
 import org.springframework.context.annotation.Bean;
@@ -13,7 +14,6 @@ import java.util.Optional;
 
 
 @RestController
-
 public class UserController  {
 
     private final UserService service;
@@ -22,28 +22,29 @@ public class UserController  {
         this.service = service;
     }
 
-    @GetMapping("/users")
+    @GetMapping("/users") // get all users
     Iterable<User> all() {
-        return service.getUsers();
+        Iterable<User> everyBody = service.getUsers();
+        for (User user : everyBody)
+            user.setPassword("Very secret password");
+        return everyBody;
     }
 
-    @GetMapping("/login")
-    Iterable<User> some() {
-        return service.getUsers();
-    }
 
-    @GetMapping("/user/{id}")
-
+    @GetMapping("/user/{id}") // get profile page
     ResponseEntity getUser(@PathVariable Long id) {
         if (this.service.existID(id)){
-        return ResponseEntity.status(HttpStatus.OK).body(this.service.getUser(id));}
+            User test = service.getUser(id);
+            test.setPassword("SecretPassword");
+            test.setToken("SecretToken");
+        return ResponseEntity.status(HttpStatus.OK).body(test);}
         else {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Not found");
         }
     }
 
 
-    @PostMapping("/user")
+    @PostMapping("/user") //register Post: check if username is taken
     ResponseEntity createUser2(@RequestBody User newUser) {
         if (this.service.existUsername(newUser)){
             return ResponseEntity.status(HttpStatus.CONFLICT).body("Error: Username already exists");
@@ -55,22 +56,24 @@ public class UserController  {
 
     }
 
-    @PostMapping("/users")
-    User createUser(@RequestBody User newUser) {
-        return this.service.createUser(newUser);
-    }
+    //@PostMapping("/users") //OLD
+    //User createUser(@RequestBody User newUser) {
+      //  return this.service.createUser(newUser);
+    //}
 
-    @PostMapping("/login")
+    @PostMapping("/login") // for login check, also old
     User checkUser(@RequestBody User newUser) {
-        return this.service.checkUser(newUser);
+        User test = service.checkUser(newUser);
+        test.setPassword("SecretPassword");
+        return test;
+
     }
 
-    @PutMapping("/user/{id}")
-
+    @PutMapping("/user/{id}") // edit user Profile
     ResponseEntity updateUser(@RequestBody User oldUser, @PathVariable Long id){
         if (this.service.existID(id) & this.service.updateCheck(oldUser)){
             this.service.updateUser(oldUser);
-            return ResponseEntity.status(HttpStatus.NO_CONTENT).body("Test: User id found and updated");
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).body("Good: User id found and updated");
         }
         else{
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User with that id is not found" +
